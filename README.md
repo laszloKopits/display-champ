@@ -19,9 +19,17 @@ Your MacBook has a hidden lid angle sensor. Display Champ reads it via IOKit to 
 
 Drop `.mid` files into `~/Library/Application Support/DisplayChamp/tracks` or use the "Open Folder" button in-app.
 
-## Install
+## Compatibility
 
-Requires macOS 14+.
+Requires a **MacBook with a lid angle sensor** (most models 2012+) running **macOS 14 Sonoma or later**. The sensor is read passively via IOKit — if your Mac doesn't have one, pitch defaults to mouse Y position as a fallback.
+
+Not tested on desktop Macs (no lid = no sensor). External displays won't help.
+
+## Disclaimer
+
+This game encourages you to repeatedly open and close your laptop lid. You do this at your own risk. The author is not responsible for worn hinges, cracked displays, spilled drinks caused by aggressive tromboning, or any other damage to your hardware, dignity, or relationships.
+
+## Install
 
 ### From source
 
