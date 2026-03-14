@@ -42,7 +42,13 @@ open .build/release/DisplayChamp.app
 
 ### Pre-built
 
-Download `DisplayChamp.zip` from [Releases](https://github.com/laszloKopits/display-champ/releases), unzip, right-click → Open (bypasses Gatekeeper).
+Download `DisplayChamp.zip` from [Releases](https://github.com/laszloKopits/display-champ/releases), unzip, then:
+
+```
+xattr -cr DisplayChamp.app
+```
+
+Right-click → Open (first time only). The `xattr` command removes the macOS quarantine flag since the app isn't notarized.
 
 ## Tech
 
