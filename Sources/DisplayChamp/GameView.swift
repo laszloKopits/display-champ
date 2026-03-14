@@ -18,6 +18,8 @@ struct GameView: View {
     @ObservedObject var gameState: GameState
     var onOpenTracksFolder: (() -> Void)?
     var onRefreshSongs: (() -> Void)?
+    @AppStorage("DisplayChamp_DisclaimerAccepted") private var disclaimerAccepted = false
+    @State private var disclaimerChecked = false
 
     var body: some View {
         ZStack {
@@ -26,37 +28,41 @@ struct GameView: View {
                 background(time: timeline.date.timeIntervalSinceReferenceDate)
             }
 
-            // Interactive screens rendered outside TimelineView so buttons work
-            switch gameState.phase {
-            case .menu:
-                menuScreen()
-            case .trackSelect:
-                trackSelectScreen
-            case .calibrateLow:
-                calibrateScreen(step: "low")
-            case .calibrateHigh:
-                calibrateScreen(step: "high")
-            case .countdown, .playing, .finished, .freestyle:
-                TimelineView(.animation) { timeline in
-                    let t = timeline.date.timeIntervalSinceReferenceDate
-                    switch gameState.phase {
-                    case .countdown:
-                        countdownScreen(time: t)
-                    case .playing:
-                        gameplayView(time: t)
-                    case .finished:
-                        endScreen(time: t)
-                    case .freestyle:
-                        freestyleView(time: t)
-                    default:
-                        EmptyView()
+            if !disclaimerAccepted {
+                disclaimerScreen
+            } else {
+                // Interactive screens rendered outside TimelineView so buttons work
+                switch gameState.phase {
+                case .menu:
+                    menuScreen()
+                case .trackSelect:
+                    trackSelectScreen
+                case .calibrateLow:
+                    calibrateScreen(step: "low")
+                case .calibrateHigh:
+                    calibrateScreen(step: "high")
+                case .countdown, .playing, .finished, .freestyle:
+                    TimelineView(.animation) { timeline in
+                        let t = timeline.date.timeIntervalSinceReferenceDate
+                        switch gameState.phase {
+                        case .countdown:
+                            countdownScreen(time: t)
+                        case .playing:
+                            gameplayView(time: t)
+                        case .finished:
+                            endScreen(time: t)
+                        case .freestyle:
+                            freestyleView(time: t)
+                        default:
+                            EmptyView()
+                        }
                     }
                 }
-            }
 
-            // Note guide overlay on all screens (except gameplay/freestyle which have their own)
-            if gameState.phase != .playing && gameState.phase != .freestyle {
-                noteGuideOverlay
+                // Note guide overlay on all screens (except gameplay/freestyle which have their own)
+                if gameState.phase != .playing && gameState.phase != .freestyle {
+                    noteGuideOverlay
+                }
             }
         }
         .frame(width: 900, height: 500)
@@ -750,6 +756,61 @@ struct GameView: View {
         let note = names[((midi % 12) + 12) % 12]
         let octave = midi / 12 - 1
         return "\(note)\(octave)"
+    }
+
+    // MARK: - Disclaimer
+
+    private var disclaimerScreen: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Text("DISPLAY CHAMP")
+                .font(.system(size: 36, weight: .black, design: .rounded))
+                .foregroundStyle(LinearGradient(
+                    colors: [Color(red: 1, green: 0.85, blue: 0), Color(red: 1, green: 0.5, blue: 0)],
+                    startPoint: .leading, endPoint: .trailing))
+                .shadow(color: .orange.opacity(0.5), radius: 16)
+
+            VStack(spacing: 8) {
+                Text("Before you play...")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.7))
+                Text("This game uses your MacBook's lid angle sensor.\nYou will be tilting your display back and forth to control pitch.")
+                    .font(.callout)
+                    .foregroundColor(.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+            }
+
+            Button(action: { disclaimerChecked.toggle() }) {
+                HStack(spacing: 10) {
+                    Image(systemName: disclaimerChecked ? "checkmark.square.fill" : "square")
+                        .font(.title3)
+                        .foregroundColor(disclaimerChecked ? .yellow : .white.opacity(0.4))
+                    Text("I understand this game involves tilting my laptop lid and I accept\nall responsibility for any damage to my hardware or dignity.")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 40)
+
+            Button(action: { disclaimerAccepted = true }) {
+                Text("LET'S GO")
+                    .font(.system(size: 16, weight: .black, design: .rounded))
+                    .foregroundColor(disclaimerChecked ? .black : .white.opacity(0.3))
+                    .frame(width: 200)
+                    .padding(.vertical, 10)
+                    .background(disclaimerChecked
+                        ? AnyShapeStyle(LinearGradient(colors: [.yellow, .orange], startPoint: .leading, endPoint: .trailing))
+                        : AnyShapeStyle(Color.white.opacity(0.08)))
+                    .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+            .disabled(!disclaimerChecked)
+
+            Spacer()
+        }
     }
 
     // MARK: - End Screen

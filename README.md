@@ -11,7 +11,7 @@ Your MacBook has a hidden lid angle sensor. Display Champ reads it via IOKit to 
 - **Lid angle = pitch** — reads the hardware HID sensor at ~60Hz, smoothed
 - **Brass synthesis** — real-time additive synthesis (8 harmonics) through AVAudioEngine
 - **MIDI support** — load any `.mid` file, pick which track to play, the rest plays as backing
-- **Starter track** — Good King Wenceslas auto-generated on first launch
+- **7 bundled tracks** — Bach, Beethoven, Brahms, and more (public domain)
 - **Freestyle mode** — just noodle with no notes
 - **Calibration** — set your lid angle range, persisted across sessions
 - **Scoring** — per-note accuracy (Perfect/Good/OK/Miss), combo multiplier, letter grades S–F

@@ -260,97 +260,21 @@ final class MIDILoader {
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
-    // MARK: - Generate missing tracks
+    // MARK: - Bundled tracks
 
-    /// Generate any bundled songs that are missing from the tracks directory.
-    static func generateMissingTracks(in directory: URL) {
-        let wenceslasURL = directory.appendingPathComponent("Good King Wenceslas.mid")
-        if !FileManager.default.fileExists(atPath: wenceslasURL.path) {
-            writeMIDIFile(notes: goodKingWenceslas(), to: wenceslasURL, bpm: 100)
+    /// Copy bundled MIDI files to the tracks directory if they don't already exist.
+    static func copyBundledTracks(to directory: URL) {
+        guard let bundledURL = Bundle.module.url(forResource: "Tracks", withExtension: nil),
+              let files = try? FileManager.default.contentsOfDirectory(
+                  at: bundledURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+        else { return }
+
+        let fm = FileManager.default
+        for file in files where ["mid", "midi"].contains(file.pathExtension.lowercased()) {
+            let dest = directory.appendingPathComponent(file.lastPathComponent)
+            if !fm.fileExists(atPath: dest.path) {
+                try? fm.copyItem(at: file, to: dest)
+            }
         }
-    }
-
-    // --- Good King Wenceslas ---
-    static func goodKingWenceslas() -> [GameNote] {
-        let bpm = 100.0
-        let b = 60.0 / bpm
-        // G major: D4=62 E4=64 F#4=66 G4=67 A4=69 B4=71 C5=72 D5=74
-        let m: [(UInt8, Double, Double)] = [
-            // "Good King Wenceslas looked out"
-            (67,0,1),(67,1,1),(67,2,1),(69,3,1),
-            // "on the feast of Stephen"
-            (67,4,1),(67,5,1),(62,6,2),
-            // "When the snow lay round about"
-            (64,8,1),(66,9,1),(67,10,1),(67,11,1),
-            // "deep and crisp and even"
-            (66,12,1),(64,13,1),(62,14,2),
-            // "Brightly shone the moon that night"
-            (67,16,1),(67,17,1),(67,18,1),(69,19,1),
-            // "though the frost was cruel"
-            (67,20,1),(67,21,1),(62,22,2),
-            // "When a poor man came in sight"
-            (64,24,1),(66,25,1),(67,26,1),(67,27,1),
-            // "gath'ring winter fuel"
-            (66,28,1),(64,29,1),(62,30,2),
-            // "Hither page and stand by me"
-            (62,32,1),(62,33,1),(64,34,1),(66,35,1),
-            // "if thou know'st it telling"
-            (64,36,1),(66,37,1),(67,38,2),
-            // "Yonder peasant who is he"
-            (64,40,1),(66,41,1),(67,42,1),(69,43,1),
-            // "where and what his dwelling"
-            (67,44,1),(66,45,1),(64,46,2),
-            // "Sire he lives a good league hence"
-            (67,48,1),(67,49,1),(67,50,1),(69,51,1),
-            // "underneath the mountain"
-            (67,52,1),(67,53,1),(74,54,2),
-            // "Right against the forest fence"
-            (74,56,1),(72,57,1),(71,58,1),(69,59,1),
-            // "by Saint Agnes' fountain"
-            (67,60,4),
-        ]
-        return m.map { n in
-            let freq = 440.0 * pow(2.0, (Double(n.0) - 69.0) / 12.0)
-            return GameNote(time: n.1 * b, frequency: freq, duration: n.2 * b, midiNote: n.0)
-        }
-    }
-
-    // MARK: - MIDI File Generation
-
-    /// Generate a .mid file from GameNote data. Useful for exporting built-in songs.
-    static func writeMIDIFile(notes: [GameNote], to url: URL, bpm: Double = 120) {
-        var seq: MusicSequence?
-        guard NewMusicSequence(&seq) == noErr, let seq = seq else { return }
-
-        // Add tempo
-        var tempoTrack: MusicTrack?
-        MusicSequenceGetTempoTrack(seq, &tempoTrack)
-        if let tt = tempoTrack {
-            let tempo = bpm
-            MusicTrackNewExtendedTempoEvent(tt, 0, tempo)
-        }
-
-        var track: MusicTrack?
-        MusicSequenceNewTrack(seq, &track)
-        guard let track = track else { DisposeMusicSequence(seq); return }
-
-        let beatsPerSecond = bpm / 60.0
-
-        for note in notes {
-            var msg = MIDINoteMessage(
-                channel: 0,
-                note: note.midiNote,
-                velocity: 80,
-                releaseVelocity: 0,
-                duration: Float32(note.duration * beatsPerSecond)
-            )
-            MusicTrackNewMIDINoteEvent(track, note.time * beatsPerSecond, &msg)
-        }
-
-        // Ensure directory exists
-        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                  withIntermediateDirectories: true)
-        MusicSequenceFileCreate(seq, url as CFURL, .midiType, .eraseFile, 480)
-        DisposeMusicSequence(seq)
     }
 }

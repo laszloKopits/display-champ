@@ -11,7 +11,8 @@ let package = Package(
             name: "DisplayChamp",
             path: "Sources/DisplayChamp",
             resources: [
-                .copy("Resources/AppIcon.icns")
+                .copy("Resources/AppIcon.icns"),
+                .copy("Resources/Tracks")
             ],
             linkerSettings: [
                 .linkedFramework("IOKit"),

@@ -3,5 +3,5 @@
 *.xcodeproj/
 DerivedData/
 dist/
-tracks/
+/tracks/
 .DS_Store

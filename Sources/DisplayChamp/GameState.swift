@@ -131,8 +131,8 @@ final class GameState: ObservableObject {
     func loadSongList(tracksDir: URL) {
         songs = []
 
-        // Generate any missing bundled tracks
-        MIDILoader.generateMissingTracks(in: tracksDir)
+        // Copy bundled tracks if not already present
+        MIDILoader.copyBundledTracks(to: tracksDir)
 
         // Scan for MIDI files
         let midiFiles = MIDILoader.scanTracks(in: tracksDir)
