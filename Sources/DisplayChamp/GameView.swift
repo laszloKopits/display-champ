@@ -200,6 +200,17 @@ struct GameView: View {
                 }
                 .buttonStyle(.plain)
 
+                Button(action: { gameState.snapToNote.toggle() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: gameState.snapToNote ? "checkmark.square.fill" : "square")
+                            .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.4))
+                        Text("Cheater Mode")
+                            .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.5))
+                    }
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                }
+                .buttonStyle(.plain)
+
                 Text("C = calibrate").font(.caption2).foregroundColor(.white.opacity(0.3))
 
                 if gameState.calibration.isCalibrated {
@@ -614,6 +625,19 @@ struct GameView: View {
             }
             .padding(.horizontal, 20).padding(.top, 10)
             Spacer()
+            if gameState.snapToNote {
+                HStack {
+                    Text("CHEATER MODE")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundColor(.yellow.opacity(0.5))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.yellow.opacity(0.08))
+                        .cornerRadius(4)
+                    Spacer()
+                }
+                .padding(.horizontal, 20).padding(.bottom, 12)
+            }
         }
     }
 

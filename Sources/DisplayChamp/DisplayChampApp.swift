@@ -174,7 +174,7 @@ struct DisplayChampApp: App {
             }
 
             // Update audio pitch
-            toneGenerator.setFrequency(gameState.currentFrequency)
+            toneGenerator.setFrequency(gameState.audioFrequency)
 
             // Update game logic
             gameState.update()

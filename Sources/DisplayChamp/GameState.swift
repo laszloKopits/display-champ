@@ -77,6 +77,8 @@ final class GameState: ObservableObject {
     @Published var currentAngle: Double = 105.0
     @Published var currentFrequency: Double = 261.6
     @Published var isBlowing: Bool = false
+    @Published var snapToNote: Bool = false
+    var audioFrequency: Double = 261.6
 
     // Popups
     @Published var popups: [AccuracyPopup] = []
@@ -298,6 +300,23 @@ final class GameState: ObservableObject {
         let logMin = log2(minFrequency)
         let logMax = log2(maxFrequency)
         currentFrequency = pow(2.0, logMin + normalizedAngle * (logMax - logMin))
+        audioFrequency = currentFrequency
+
+        if snapToNote {
+            // Find notes active now or starting within 1 second
+            let candidates = notes.filter { note in
+                let noteEnd = note.time + note.duration
+                return noteEnd >= currentTime - 0.15 && note.time <= currentTime + 1.0
+            }
+            if let nearest = candidates.min(by: {
+                abs($0.frequency - currentFrequency) / $0.frequency < abs($1.frequency - currentFrequency) / $1.frequency
+            }) {
+                let ratio = abs(nearest.frequency - currentFrequency) / nearest.frequency
+                if ratio < 0.12 { // ~2 semitones
+                    audioFrequency = nearest.frequency
+                }
+            }
+        }
     }
 
     // MARK: - Update
