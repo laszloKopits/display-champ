@@ -10,7 +10,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.applicationIconImage = icon
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NSApp.windows.first?.makeKeyAndOrderFront(nil)
+            if let window = NSApp.windows.first {
+                window.makeKeyAndOrderFront(nil)
+                window.collectionBehavior.insert(.fullScreenPrimary)
+            }
         }
     }
 }
@@ -37,7 +40,8 @@ struct DisplayChampApp: App {
                 }
         }
         .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 900, height: 500)
     }
 
     private static var tracksDirectory: URL {
@@ -89,6 +93,11 @@ struct DisplayChampApp: App {
             case 8: // C key
                 if gameState.phase == .menu {
                     gameState.startCalibration()
+                    return nil
+                }
+            case 3: // F key
+                if gameState.phase == .menu {
+                    NSApp.windows.first?.toggleFullScreen(nil)
                     return nil
                 }
             case 34: // I key

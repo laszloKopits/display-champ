@@ -65,7 +65,7 @@ struct GameView: View {
                 }
             }
         }
-        .frame(width: 900, height: 500)
+        .frame(minWidth: 700, minHeight: 400)
     }
 
     // MARK: - Note Guide Overlay
@@ -165,62 +165,66 @@ struct GameView: View {
     // MARK: - Menu Screen
 
     private func menuScreen() -> some View {
-        HStack(spacing: 0) {
-            // Left side: title + controls
-            VStack(spacing: 14) {
-                Spacer()
+        GeometryReader { geo in
+            HStack(spacing: 0) {
+                // Left side: title + controls
+                VStack(spacing: 14) {
+                    Spacer()
 
-                Text("DISPLAY CHAMP")
-                    .font(.system(size: 40, weight: .black, design: .rounded))
-                    .foregroundStyle(LinearGradient(
-                        colors: [Color(red: 1, green: 0.85, blue: 0), Color(red: 1, green: 0.5, blue: 0)],
-                        startPoint: .leading, endPoint: .trailing))
-                    .shadow(color: .orange.opacity(0.5), radius: 16)
+                    Text("DISPLAY CHAMP")
+                        .font(.system(size: min(40, geo.size.width * 0.045), weight: .black, design: .rounded))
+                        .foregroundStyle(LinearGradient(
+                            colors: [Color(red: 1, green: 0.85, blue: 0), Color(red: 1, green: 0.5, blue: 0)],
+                            startPoint: .leading, endPoint: .trailing))
+                        .shadow(color: .orange.opacity(0.5), radius: 16)
 
-                // Angle meter
-                angleMeter.frame(width: 260, height: 50)
+                    // Angle meter
+                    angleMeter.frame(width: min(260, geo.size.width * 0.29), height: 50)
 
-                VStack(spacing: 4) {
-                    Text("Tilt display = pitch").font(.caption).foregroundColor(.white.opacity(0.4))
-                    Text("Click/Space = play note").font(.caption).foregroundColor(.white.opacity(0.4))
-                }
-
-                Button(action: { gameState.phase = .freestyle }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "music.note")
-                        Text("FREESTYLE")
+                    VStack(spacing: 4) {
+                        Text("Tilt display = pitch").font(.caption).foregroundColor(.white.opacity(0.4))
+                        Text("Click/Space = play note").font(.caption).foregroundColor(.white.opacity(0.4))
                     }
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.cyan)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 7)
-                    .background(Color.cyan.opacity(0.1))
-                    .cornerRadius(8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.cyan.opacity(0.25), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
 
-                Button(action: { gameState.snapToNote.toggle() }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: gameState.snapToNote ? "checkmark.square.fill" : "square")
-                            .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.4))
-                        Text("Cheater Mode")
-                            .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.5))
+                    Button(action: { gameState.phase = .freestyle }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "music.note")
+                            Text("FREESTYLE")
+                        }
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.cyan)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 7)
+                        .background(Color.cyan.opacity(0.1))
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.cyan.opacity(0.25), lineWidth: 1))
                     }
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .buttonStyle(.plain)
+
+                    Button(action: { gameState.snapToNote.toggle() }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: gameState.snapToNote ? "checkmark.square.fill" : "square")
+                                .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.4))
+                            Text("Cheater Mode")
+                                .foregroundColor(gameState.snapToNote ? .yellow : .white.opacity(0.5))
+                        }
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                    }
+                    .buttonStyle(.plain)
+
+                    HStack(spacing: 12) {
+                        Text("C = calibrate").font(.caption2).foregroundColor(.white.opacity(0.3))
+                        Text("F = fullscreen").font(.caption2).foregroundColor(.white.opacity(0.3))
+                    }
+
+                    if gameState.calibration.isCalibrated {
+                        Text("Calibrated: \(Int(gameState.calibration.minAngle))°-\(Int(gameState.calibration.maxAngle))°")
+                            .font(.caption2).foregroundColor(.green.opacity(0.4))
+                    }
+
+                    Spacer()
                 }
-                .buttonStyle(.plain)
-
-                Text("C = calibrate").font(.caption2).foregroundColor(.white.opacity(0.3))
-
-                if gameState.calibration.isCalibrated {
-                    Text("Calibrated: \(Int(gameState.calibration.minAngle))°-\(Int(gameState.calibration.maxAngle))°")
-                        .font(.caption2).foregroundColor(.green.opacity(0.4))
-                }
-
-                Spacer()
-            }
-            .frame(width: 340)
+                .frame(width: geo.size.width * 0.38)
 
             // Right side: song list
             VStack(alignment: .leading, spacing: 8) {
@@ -284,6 +288,7 @@ struct GameView: View {
             }
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity)
+        }
         }
     }
 
@@ -389,7 +394,7 @@ struct GameView: View {
                     }
                 }
             }
-            .frame(maxWidth: 500, maxHeight: 300)
+            .frame(maxWidth: 600)
 
             Button(action: { gameState.phase = .menu }) {
                 Text("Back").font(.callout).foregroundColor(.white.opacity(0.5))
